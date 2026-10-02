@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Orto-K | Adaptación Corneal</title>
+    <!-- Tailwind CSS desde CDN para diseño moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fluo-gradient {
+            background: radial-gradient(circle at center, rgba(0,255,100,0.1) 0%, rgba(0,255,100,0.8) 45%, rgba(0,50,0,0.9) 70%, rgba(0,200,80,0.4) 100%);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 shadow-md">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-teal-400 flex items-center gap-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                Selector & Calculador Orto-K
+            </h1>
+            <span class="text-xs bg-teal-900/60 text-teal-300 border border-teal-700 px-3 py-1 rounded-full font-mono">
+                Geometría Inversa Modular
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Formulario de Entrada (Left Column) -->
+        <section class="lg:col-span-5 bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl space-y-4">
+            <h2 class="text-lg font-semibold text-slate-200 border-b border-slate-700 pb-2 flex items-center gap-2">
+                <span>📋</span> Datos Topográficos y Refractivos
+            </h2>
+
+            <!-- SimK K1 y K2 -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs text-slate-400 font-medium mb-1">K1 Plano (D)</label>
+                    <input type="number" id="k1" value="43.50" step="0.12" min="36" max="52" 
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-100 font-mono text-sm focus:border-teal-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 font-medium mb-1">K2 Curvo (D)</label>
+                    <input type="number" id="k2" value="44.75" step="0.12" min="36" max="52" 
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-100 font-mono text-sm focus:border-teal-500 focus:outline-none">
+                </div>
+            </div>
+
+            <!-- Refracción y Excentricidad -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs text-slate-400 font-medium mb-1">Miopía a corregir (Rx D)</label>
+                    <input type="number" id="rx" value="-3.00" step="0.25" max="0" min="-10" 
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-100 font-mono text-sm focus:border-teal-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 font-medium mb-1">Excentricidad (e)</label>
+                    <input type="number" id="e" value="0.50" step="0.05" min="0.1" max="0.9" 
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-100 font-mono text-sm focus:border-teal-500 focus:outline-none">
+                </div>
+            </div>
+
+            <!-- Elevación / Altimetría a 8mm -->
+            <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700/80 space-y-2">
+                <div class="flex justify-between items-center">
+                    <label class="text-xs text-slate-300 font-medium">Δ Elevación a 8 mm (µm)</label>
+                    <span id="elevValue" class="text-xs font-mono font-bold text-teal-400">45 µm</span>
+                </div>
+                <input type="range" id="elev" min="0" max="100" value="45" step="1" 
+                    class="w-full accent-teal-400 bg-slate-700 h-2 rounded-lg cursor-pointer">
+                <p class="text-[11px] text-slate-400 italic">
+                    💡 Si la diferencia entre meridianos en el mapa de elevación a 8 mm es ≥ 30 µm, se sugiere banda tórica.
+                </p>
+            </div>
+
+            <!-- Factor Jessen -->
+            <div>
+                <label class="block text-xs text-slate-400 font-medium mb-1">Factor de Sobretatamiento (Jessen)</label>
+                <select id="jessen" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-100 font-mono text-sm focus:border-teal-500 focus:outline-none">
+                    <option value="0.75" selected>+0.75 D (Estándar)</option>
+                    <option value="0.50">+0.50 D</option>
+                    <option value="1.00">+1.00 D</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Resultados y Recomendación (Right Column) -->
+        <section class="lg:col-span-7 space-y-6">
+
+            <!-- Card de Prescripción Sugerida -->
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                    <h2 class="text-lg font-semibold text-slate-200">🔍 Parámetros Recomendados</h2>
+                    <span id="designTag" class="px-3 py-1 text-xs font-bold rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                        APOYO TÓRICO RECOMENDADO
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700">
+                        <span class="block text-[11px] text-slate-400">Curva Base (CB)</span>
+                        <span id="resCB" class="text-lg font-mono font-bold text-teal-300">8.48 mm</span>
+                        <span id="resCBDio" class="block text-[10px] text-slate-500">39.75 D</span>
+                    </div>
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700">
+                        <span class="block text-[11px] text-slate-400">Banda Alineación</span>
+                        <span id="resCA" class="text-lg font-mono font-bold text-teal-300">43.50 D</span>
+                        <span id="resCARad" class="block text-[10px] text-slate-500">7.76 mm</span>
+                    </div>
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700">
+                        <span class="block text-[11px] text-slate-400">Toricidad Perif.</span>
+                        <span id="resTor" class="text-lg font-mono font-bold text-amber-300">1.50 D</span>
+                        <span id="resMicras" class="block text-[10px] text-slate-500">50 µm de Δsag</span>
+                    </div>
+                    <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700">
+                        <span class="block text-[11px] text-slate-400">Diámetro Sugerido</span>
+                        <span id="resDia" class="text-lg font-mono font-bold text-teal-300">10.6 mm</span>
+                        <span class="block text-[10px] text-slate-500">Estándar</span>
+                    </div>
+                </div>
+
+                <!-- Resumen de Pedido para enviar al laboratorio -->
+                <div class="bg-slate-900 p-4 rounded-xl border border-teal-900/50 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-teal-400 font-bold uppercase tracking-wider">Código de Pedido / Etiqueta</span>
+                        <button onclick="copiarPedido()" class="text-xs bg-teal-600 hover:bg-teal-500 text-white px-2.5 py-1 rounded transition">
+                            📋 Copiar
+                        </button>
+                    </div>
+                    <p id="pedidoText" class="font-mono text-sm text-slate-200 bg-slate-950 p-2.5 rounded border border-slate-800 selection:bg-teal-700">
+                        8.48 / 43.50 x 45.00 / e:0.50 / DIA 10.6
+                    </p>
+                </div>
+            </div>
+
+            <!-- Esquema Simulación Fluoroscópica -->
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl flex flex-col md:flex-row items-center gap-6">
+                <div class="relative w-44 h-44 rounded-full border-4 border-slate-700 fluo-gradient flex items-center justify-center shadow-inner flex-shrink-0">
+                    <div class="w-20 h-20 rounded-full border border-teal-200/30 bg-slate-950/80 flex items-center justify-center text-[10px] font-mono text-teal-400/80 text-center p-1">
+                        Aplanamiento Central<br>(5-10 µm)
+                    </div>
+                </div>
+                <div class="space-y-2 text-xs text-slate-300">
+                    <h3 class="font-semibold text-slate-100 text-sm">Patrón Esperado (Ojo de Buey)</h3>
+                    <ul class="space-y-1 list-disc list-inside text-slate-400">
+                        <li><strong class="text-slate-200">Centro:</strong> Toque/Aplanamiento apical sin tinción de fluoresceína acumulada.</li>
+                        <li><strong class="text-slate-200">Anillo Verde:</strong> Reservorio de lágrima en zona de retorno (10-25 µm de profundidad).</li>
+                        <li><strong class="text-slate-200">Periferia:</strong> Banda de alineación constante 360° para sellado hermético.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Logic JS -->
+    <script>
+        function calcularOrtoK() {
+            const k1 = parseFloat(document.getElementById('k1').value) || 43.50;
+            const k2 = parseFloat(document.getElementById('k2').value) || 44.75;
+            const rx = parseFloat(document.getElementById('rx').value) || -3.00;
+            const e = parseFloat(document.getElementById('e').value) || 0.50;
+            const elev = parseInt(document.getElementById('elev').value) || 0;
+            const jessen = parseFloat(document.getElementById('jessen').value) || 0.75;
+
+            document.getElementById('elevValue').innerText = elev + " µm";
+
+            // 1. Curva Base (CB)
+            // K_tratamiento = K1 - |Rx| - Jessen
+            const miopia = Math.abs(rx);
+            const kTratamiento = k1 - miopia - jessen;
+            const cbMm = 337.5 / kTratamiento;
+
+            // 2. Curva de Alineación (CA)
+            const caDioptrias = k1;
+            const caMm = 337.5 / caDioptrias;
+
+            // 3. Evaluacion de Toricidad Periférica
+            const esTorico = elev >= 30;
+            const toricityVal = esTorico ? Math.round((elev / 30) * 0.50 * 4) / 4 : 0; // Redondeado a pasos de 0.25D
+
+            // UI Updates
+            document.getElementById('resCB').innerText = cbMm.toFixed(2) + " mm";
+            document.getElementById('resCBDio').innerText = kTratamiento.toFixed(2) + " D";
+
+            document.getElementById('resCA').innerText = caDioptrias.toFixed(2) + " D";
+            document.getElementById('resCARad').innerText = caMm.toFixed(2) + " mm";
+
+            document.getElementById('resMicras').innerText = elev + " µm de Δsag";
+
+            const tag = document.getElementById('designTag');
+            if (esTorico) {
+                tag.className = "px-3 py-1 text-xs font-bold rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40";
+                tag.innerText = "APOYO TÓRICO RECOMENDADO";
+                document.getElementById('resTor').innerText = toricityVal.toFixed(2) + " D";
+                document.getElementById('resTor').className = "text-lg font-mono font-bold text-amber-300";
+            } else {
+                tag.className = "px-3 py-1 text-xs font-bold rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+                tag.innerText = "GEOMETRÍA ESFÉRICA";
+                document.getElementById('resTor').innerText = "Esférico";
+                document.getElementById('resTor').className = "text-lg font-mono font-bold text-emerald-300";
+            }
+
+            // Generar string de pedido
+            let pedidoStr = "";
+            if (esTorico) {
+                const ca2 = caDioptrias + toricityVal;
+                pedidoStr = `${cbMm.toFixed(2)} / ${caDioptrias.toFixed(2)} x ${ca2.toFixed(2)} / e:${e.toFixed(2)} / DIA 10.6`;
+            } else {
+                pedidoStr = `${cbMm.toFixed(2)} / ${caDioptrias.toFixed(2)} / e:${e.toFixed(2)} / DIA 10.6`;
+            }
+            document.getElementById('pedidoText').innerText = pedidoStr;
+        }
+
+        function copiarPedido() {
+            const text = document.getElementById('pedidoText').innerText;
+            navigator.clipboard.writeText(text);
+            alert("¡Código de pedido copiado al portapapeles!");
+        }
+
+        // Event Listeners
+        document.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('input', calcularOrtoK);
+        });
+
+        // Run on load
+        calcularOrtoK();
+    </script>
+</body>
+</html>
