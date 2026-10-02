@@ -7,7 +7,6 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Fluorograma Realista bajo Luz de Cobalto */
         .cobalt-bg {
             background-color: #030825;
             background-image: radial-gradient(circle at 50% 50%, #0a174e 0%, #030617 100%);
@@ -39,9 +38,10 @@
             align-items: center;
             justify-content: center;
             border: 1px solid rgba(0, 255, 100, 0.15);
+            transition: all 0.3s ease;
         }
 
-        /* 2. Anillo de Retorno Verde Fluorescente (Reservorio Lagunar) */
+        /* 2. Anillo de Retorno Verde Fluorescente (Dinámico) */
         .return-ring {
             position: absolute;
             width: 130px;
@@ -50,9 +50,10 @@
             background: radial-gradient(circle, rgba(0,255,80,0.95) 60%, rgba(0,200,50,0.8) 100%);
             box-shadow: 0 0 18px #00ff55, inset 0 0 12px #00ff55;
             z-index: 5;
+            transition: all 0.3s ease;
         }
 
-        /* 3. Banda de Alineación Oscura (Apoyo Periférico) */
+        /* 3. Banda de Alineación Oscura */
         .alignment-band {
             position: absolute;
             width: 175px;
@@ -60,9 +61,10 @@
             border-radius: 50%;
             background: #030822;
             z-index: 2;
+            transition: all 0.3s ease;
         }
 
-        /* 4. Bisel / Levantamamiento de Borde (Anillo Verde Exterior Fino) */
+        /* 4. Bisel / Levantamiento de Borde */
         .edge-lift {
             position: absolute;
             width: 188px;
@@ -135,7 +137,7 @@
                 <input type="range" id="elev" min="0" max="100" value="45" step="1" 
                     class="w-full accent-teal-400 bg-slate-700 h-2 rounded-lg cursor-pointer">
                 <p class="text-[11px] text-slate-400 italic">
-                    💡 Si la diferencia entre meridianos en el mapa de elevación a 8 mm es ≥ 30 µm, se sugiere banda tórica.
+                    💡 Mueve el deslizador para ver cómo cambia la toricidad del fluorograma en tiempo real.
                 </p>
             </div>
 
@@ -199,14 +201,14 @@
                 </div>
             </div>
 
-            <!-- Esquema Simulación Fluoroscópica Realista -->
+            <!-- Esquema Simulación Fluoroscópica Dinámica -->
             <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl flex flex-col sm:flex-row items-center gap-6 cobalt-bg">
-                <!-- Fluorograma Realista bajo Cobalto -->
+                <!-- Fluorograma Dinámico -->
                 <div class="real-fluorogram flex-shrink-0">
                     <div class="edge-lift"></div>
-                    <div class="alignment-band"></div>
-                    <div class="return-ring"></div>
-                    <div class="apical-zone">
+                    <div id="alignmentBand" class="alignment-band"></div>
+                    <div id="returnRing" class="return-ring"></div>
+                    <div id="apicalZone" class="apical-zone">
                         <span class="text-[9px] font-mono text-blue-200/50 text-center leading-tight">Apical<br>Toque</span>
                     </div>
                 </div>
@@ -214,24 +216,20 @@
                 <!-- Leyenda clínica -->
                 <div class="space-y-2 text-xs text-slate-300">
                     <h3 class="font-semibold text-teal-300 text-sm flex items-center gap-2">
-                        <span>👁️</span> Patrón Fluoroscópico Real (Luz de Cobalto)
+                        <span>👁️</span> Patrón Dinámico (Luz de Cobalto)
                     </h3>
                     <ul class="space-y-1.5 list-none text-slate-300">
                         <li class="flex items-center gap-2">
                             <span class="w-3 h-3 rounded-full bg-slate-950 border border-blue-400/40 inline-block"></span>
-                            <span><strong class="text-white">Centro Oscuro:</strong> Toque/Aplanamiento apical ($5\text{-}10\ \mu\text{m}$).</span>
+                            <span><strong class="text-white">Centro Oscuro:</strong> Apoyo apical.</span>
                         </li>
                         <li class="flex items-center gap-2">
                             <span class="w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_6px_#00ff55] inline-block"></span>
-                            <span><strong class="text-emerald-300">Anillo Verde Brillantísimo:</strong> Reservorio de lágrima en zona de retorno.</span>
+                            <span><strong class="text-emerald-300">Anillo Verde:</strong> Retorno (varía con la miopía).</span>
                         </li>
                         <li class="flex items-center gap-2">
                             <span class="w-3 h-3 rounded-full bg-slate-900 border border-slate-700 inline-block"></span>
-                            <span><strong class="text-white">Banda de Apoyo Oscura:</strong> Banda de alineación periférica (sellado).</span>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full border border-emerald-400 inline-block"></span>
-                            <span><strong class="text-emerald-300">Bisel Exterior:</strong> Elevación de borde para intercambio lagrimal.</span>
+                            <span><strong class="text-white">Forma del Anillo:</strong> Muestra la toricidad cuando $\Delta Sag \ge 30\ \mu\text{m}$.</span>
                         </li>
                     </ul>
                 </div>
@@ -296,6 +294,25 @@
                 pedidoStr = `${cbMm.toFixed(2)} / ${caDioptrias.toFixed(2)} / e:${e.toFixed(2)} / DIA 10.6`;
             }
             document.getElementById('pedidoText').innerText = pedidoStr;
+
+            // --- ACTUALIZACIÓN DINÁMICA DEL FLUOROGRAMA ---
+            const returnRing = document.getElementById('returnRing');
+            const apicalZone = document.getElementById('apicalZone');
+
+            // Ancho del reservorio según miopía (a mayor miopía, mayor reservorio)
+            const ringSize = Math.min(110 + miopia * 8, 150);
+            returnRing.style.width = `${ringSize}px`;
+            returnRing.style.height = `${ringSize}px`;
+
+            // Efecto de Toricidad (si elevación >= 30, el anillo se vuelve ovalado)
+            if (esTorico) {
+                const distortion = Math.min(1 + (elev - 30) * 0.005, 1.25);
+                returnRing.style.transform = `scaleX(${distortion})`;
+                returnRing.style.borderRadius = "40%";
+            } else {
+                returnRing.style.transform = "scaleX(1)";
+                returnRing.style.borderRadius = "50%";
+            }
         }
 
         function copiarPedido() {
